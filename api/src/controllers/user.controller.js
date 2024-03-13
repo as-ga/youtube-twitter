@@ -3,6 +3,8 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloundinary } from "../utils/fileUpload.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+
+
 const registerUser = asyncHandler(async (req, res) => {
   //  get user details from frontend
   //  validation - not empty
@@ -29,8 +31,14 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   // check for images
-  const avatarLocalPath = req.files.avatar[0].path;
-  const coverImagesLocalPath = req.files.coverImages[0].path;
+  const avatarLocalPath = req.files?.avatar[0].path;
+  // const coverImageLocalPath = req.files?.coverImage[0].path;
+
+  let coverImageLocalPath;
+  if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+  coverImageLocalPath = req.files.coverImage[0].path;
+  }
+
 
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar image is required");
@@ -39,7 +47,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // upload images to cloudinary
 
   const avatar = await uploadOnCloundinary(avatarLocalPath);
-  const coverImages = await uploadOnCloundinary(coverImagesLocalPath);
+  const coverImage = await uploadOnCloundinary(coverImageLocalPath);
 
   if (!avatar) {
     throw new ApiError(400, "Error uploading avatar image");
@@ -51,7 +59,7 @@ const registerUser = asyncHandler(async (req, res) => {
     username: username.toLowerCase(),
     password,
     avatar: avatar.url,
-    coverImages: coverImages?.url || "",
+    coverImage: coverImage?.url || "",
   });
 
   const createdUser = await User.findById(user._id).select(
