@@ -11,8 +11,11 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
-//routes import
+app.get("/", (req, res) => {
+  res.send("YouTube Twitter Clone API");
+});
 
+//routes import
 import userRouter from "./routes/user.routes.js";
 
 //routes declaration
